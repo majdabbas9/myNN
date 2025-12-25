@@ -1,4 +1,4 @@
-from backend import np
+from .backend import np
 class Loss:
     def calculate(self, output, y):
         sample_losses = self.forward(output, y)

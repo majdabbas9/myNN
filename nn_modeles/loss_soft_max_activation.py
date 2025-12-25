@@ -1,6 +1,6 @@
-from backend import np
-from loss_function import LossCCE
-from softmax import ActivationSoftmax
+from .backend import np
+from .loss_function import LossCCE
+from .softmax import ActivationSoftmax
 class ActivationSoftmaxLossCategoricalCrossentropy():
     def __init__(self):
         self.activation = ActivationSoftmax()

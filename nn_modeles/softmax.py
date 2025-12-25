@@ -1,4 +1,4 @@
-from backend import np
+from .backend import np
 class ActivationSoftmax:
     def forward(self, inputs):
         self.inputs = inputs

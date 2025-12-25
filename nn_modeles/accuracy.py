@@ -1,4 +1,4 @@
-from backend import np
+from .backend import np
 def calc_accuracy(y_pred,y_true):
     predections = np.argmax(y_pred,axis=1)
     if len(y_true.shape) == 2:

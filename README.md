@@ -11,11 +11,7 @@ A custom implementation of a deep learning framework built from scratch in Pytho
     - SGD with Momentum
     - AdaGrad
     - Adam
-- **Loss Functions**: Categorical Crossentropy (with integrated Softmax activation for stability).
-- **Backend Support**: Abstraction layer (`backend.py`) to potentially support different array backends (e.g., NumPy).
-- **Examples**:
-    - `main.py`: Classification on generated Spiral Data.
-    - `test_minist.py`: Handwritten digit recognition on the MNIST dataset.
+- **Loss Functions**: Categorical Crossentropy.
 
 ## Installation
 
@@ -51,7 +47,7 @@ python main.py
 ```
 
 ### Train on MNIST (Handwritten Digits)
-Train a multi-layer perceptron to recognize handwritten digits. This script fetches the MNIST dataset, creates a deep network (784 -> 128 -> 64 -> 10), and uses mini-batch gradient descent.
+Train a multi-layer perceptron to recognize handwritten digits. This script fetches the MNIST dataset, creates a deep network (784 -> 128 -> 64 -> 10), and uses mini-batch gradient descent got an accuracy of 97%.
 
 ```bash
 python test_minist.py

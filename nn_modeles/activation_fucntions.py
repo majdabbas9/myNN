@@ -1,4 +1,4 @@
-from backend import np
+from .backend import np
 
 class ActivationReLU :
     def forward(self, inputs):
