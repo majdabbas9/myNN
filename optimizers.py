@@ -33,35 +33,63 @@ class OptimizerAdaGrad:
         layer.bias_cache += layer.dbiases ** 2
         layer.weights -= self.learning_rate * (layer.dweights / (np.sqrt(layer.weight_cache) + self.smothing))
         layer.biases -=  self.learning_rate * (layer.dbiases / (np.sqrt(layer.bias_cache) + self.smothing))
+
 class OptimizerAdam:
     def __init__(self, learning_rate=0.001, decay=0., epsilon=1e-7, beta1=0.9, beta2=0.999):
         self.learning_rate = learning_rate
+        self.current_learning_rate = learning_rate
+        self.decay = decay
+        self.iterations = 0
+        self.epsilon = epsilon
         self.beta1 = beta1
         self.beta2 = beta2
-        self.smothing = smothing
-        self.iter = 0
+
+    def pre_update_params(self):
+        if self.decay:
+            self.current_learning_rate = self.learning_rate * \
+                (1. / (1. + self.decay * self.iterations))
+        else:
+            self.current_learning_rate = self.learning_rate
+
     def update_params(self, layer):
         if not hasattr(layer, 'weight_cache'):
-            layer.weight_moving_avarge1 = np.zeros_like(layer.weights)
-            layer.bias_moving_avarge1 = np.zeros_like(layer.biases)
-            layer.weight_moving_avarge2 = np.zeros_like(layer.weights)
-            layer.bias_moving_avarge2 = np.zeros_like(layer.biases)
+            layer.weight_momentums = np.zeros_like(layer.weights)
             layer.weight_cache = np.zeros_like(layer.weights)
-            layer.bias_cache = np.zeros_like(layer.biases) 
-        layer.weight_cache += layer.dweights ** 2
-        layer.bias_cache += layer.dbiases ** 2
+            layer.bias_momentums = np.zeros_like(layer.biases)
+            layer.bias_cache = np.zeros_like(layer.biases)
 
-        beta1_exp_iter = self.beta1 ** (self.iter + 1)
-        beta2_exp_iter = self.beta2 ** (self.iter + 1)
+        # Update momentum  with current gradients
+        layer.weight_momentums = self.beta1 * \
+            layer.weight_momentums + (1 - self.beta1) * layer.dweights
+        layer.bias_momentums = self.beta1 * \
+            layer.bias_momentums + (1 - self.beta1) * layer.dbiases
+        
+        # Update cache with squared current gradients
+        layer.weight_cache = self.beta2 * layer.weight_cache + \
+            (1 - self.beta2) * layer.dweights**2
+        layer.bias_cache = self.beta2 * layer.bias_cache + \
+            (1 - self.beta2) * layer.dbiases**2
 
-        layer.weight_moving_avarge1 = (beta1_exp_iter * layer.weight_moving_avarge1 + (1 - beta1_exp_iter) * layer.dweights) / (1 - beta1_exp_iter)
-        layer.bias_moving_avarge1 = (beta1_exp_iter * layer.bias_moving_avarge1 + (1 - beta1_exp_iter) * layer.dbiases) / (1 - beta1_exp_iter)
+        # Bias correction
+        iteration = self.iterations + 1
+        weight_momentums_corrected = layer.weight_momentums / \
+            (1 - self.beta1 ** iteration)
+        bias_momentums_corrected = layer.bias_momentums / \
+            (1 - self.beta1 ** iteration)
+        weight_cache_corrected = layer.weight_cache / \
+            (1 - self.beta2 ** iteration)
+        bias_cache_corrected = layer.bias_cache / \
+            (1 - self.beta2 ** iteration)
 
-        layer.weight_moving_avarge2 = (beta2_exp_iter * layer.weight_moving_avarge2 + (1 - beta2_exp_iter) * layer.weight_cache) / (1 - beta2_exp_iter)
-        layer.bias_moving_avarge2 = (beta2_exp_iter * layer.bias_moving_avarge2 + (1 - beta2_exp_iter) * layer.bias_cache) / (1 - beta2_exp_iter)
+        # Vanilla SGD parameter update + normalization with square rooted cache
+        layer.weights += -self.current_learning_rate * \
+                         weight_momentums_corrected / \
+                         (np.sqrt(weight_cache_corrected) + self.epsilon)
+        layer.biases += -self.current_learning_rate * \
+                        bias_momentums_corrected / \
+                        (np.sqrt(bias_cache_corrected) + self.epsilon)
 
-        layer.weights -= self.learning_rate * (layer.weight_moving_avarge1 / (np.sqrt(layer.weight_moving_avarge2) + self.smothing))
-        layer.biases -=  self.learning_rate * (layer.bias_moving_avarge1 / (np.sqrt(layer.bias_moving_avarge2) + self.smothing))
-        self.iter += 1
+    def post_update_params(self):
+        self.iterations += 1
 
 

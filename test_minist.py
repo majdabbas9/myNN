@@ -7,7 +7,7 @@ from nn_Layer import LayerDense
 from activation_fucntions import ActivationReLU
 from accuracy import calc_accuracy
 from loss_soft_max_activation import ActivationSoftmaxLossCategoricalCrossentropy
-from optimizers import OptimizerSGDWithMomentum
+from optimizers import OptimizerSGDWithMomentum,OptimizerAdam
 import matplotlib.pyplot as plt
 
 nnfs.init()
@@ -34,7 +34,7 @@ dense2 = LayerDense(128, 64)
 activation2 = ActivationReLU()
 dense3 = LayerDense(64, 10) 
 loss_activation = ActivationSoftmaxLossCategoricalCrossentropy()
-optimizer = OptimizerSGDWithMomentum(learning_rate=0.1, alpha=0.9)
+optimizer = OptimizerAdam()
 
 # Lists for tracking metrics
 loss_stats = []
@@ -111,9 +111,11 @@ for epoch in range(EPOCHS):
         dense1.backward(activation1.dinputs)
 
         # Update params
+        optimizer.pre_update_params()
         optimizer.update_params(dense1)
         optimizer.update_params(dense2)
         optimizer.update_params(dense3)
+        optimizer.post_update_params()
     
     # Average metrics for the epoch
     epoch_loss /= steps

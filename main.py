@@ -36,14 +36,16 @@ for epoch in range(10001):
     if not epoch % 100:
         loss_stats.append(to_numpy(loss))
         acc_stats.append(to_numpy(accuracy))
-        print(f'epoch: {epoch}, ' +f'acc: {accuracy:.3f}, ' +f'loss: {loss:.3f}, ' + f'lr: {optimizer.current_learning_rate}')
+        print(f'epoch: {epoch}, ' +f'acc: {accuracy:.3f}, ' +f'loss: {loss:.3f}, ' + f'lr: {optimizer.learning_rate}')
 
     loss_activation.backward(loss_activation.output,y_train)
     dense2.backward(loss_activation.dinputs)
     activation1.backward(dense2.dinputs)
     dense1.backward(activation1.dinputs)
+    optimizer.pre_update_params()
     optimizer.update_params(dense1)
     optimizer.update_params(dense2)
+    optimizer.post_update_params()
 
 # Validate the model
 print('Validation')
